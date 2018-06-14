@@ -22,7 +22,7 @@ class Partner extends API {
 		$this->form_validation->set_rules('city', 'City', 'required');
 		$this->form_validation->set_rules('sub_city', 'Sub-City', 'required');
 		$this->form_validation->set_rules('wereda', 'Wereda', 'required');
-var_dump($this->input->post());
+
 		if($this->form_validation->run() === FALSE ) {
 			$this->response(validation_errors(), API::HTTP_OK);
 		} else {
