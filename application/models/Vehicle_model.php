@@ -9,9 +9,28 @@ class Vehicle_model extends CI_Model {
 	}
 
 
-	public function get_vehicle($id = NULL) {
+	public function get_vehicle($id = NULL, $filter_string = '', $page_number = 0, $page_size = NULL, $sort = 'ASC') {
+
+
 
 		if(is_null($id)) {
+					$this->db->like('make', $filter_string);
+			$this->db->or_like('model', $filter_string, 'after');
+			$this->db->or_like('year_made', $filter_string);
+			$this->db->or_like('color', $filter_string, 'after');
+			$this->db->or_like('type', $filter_string);
+			$this->db->order_by('make', $sort);
+
+			if($page_number === 0) {
+				$start = 0;
+				$end = $page_size;
+			} else {
+				$start = $page_number * $page_size;
+				$end = $start + $page_size;
+			}
+
+			$this->db->limit(1000 , $start);
+			
 				$result_set = $this->db->get('vehicle');
 		
 			return $result_set->result_array();
