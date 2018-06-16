@@ -17,8 +17,9 @@ class Vehicle extends API {
 			$sort = $this->input->get('sortOrder', TRUE);
 			$page_size = $this->input->get('pageSize', TRUE);
 			$page_number = $this->input->get('pageNumber', TRUE);
+			$sort_column = $this->input->get('sortColumn', TRUE);
 
-			$result = $this->vehicle_model->get_vehicle($id, $filter_string, $page_number, $page_size, $sort);
+			$result = $this->vehicle_model->get_vehicle($id, $filter_string, $page_number, $page_size, $sort, $sort_column);
 			$this->response($result, API::HTTP_OK);
 		}
 
