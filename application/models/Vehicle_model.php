@@ -10,9 +10,7 @@ class Vehicle_model extends CI_Model {
 
 
 	public function get_vehicle($id = NULL, $filter_string = '', $page_number = 0, $page_size = NULL, $sort = 'ASC', $sort_column = 'VEHICLE_ID') {
-
-
-
+		
 		if(is_null($id)) {
 			$this->db->like('make', $filter_string);
 			$this->db->or_like('model', $filter_string, 'after');

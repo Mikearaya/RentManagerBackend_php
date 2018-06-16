@@ -10,8 +10,16 @@ class Partner extends API {
 	}
 
 	public function index_get($id = NULL ) {
-		$result = $this->partner_model->get_partner($id);
+		
+		$filter_string = $this->input->get('filter', TRUE);
+		$sort = $this->input->get('sortOrder', TRUE);
+		$page_size = $this->input->get('pageSize', TRUE);
+		$page_number = $this->input->get('pageIndex', TRUE);
+		$sort_column = $this->input->get('sortColumn', TRUE);
+
+		$result = $this->partner_model->get_partner($id, $filter_string, $page_size, $page_number, $sort, $sort_column);
 		$this->response($result, API::HTTP_OK);
+
 	}
 
 	public function index_post($id = NULL) {
