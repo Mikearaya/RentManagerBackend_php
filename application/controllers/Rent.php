@@ -8,7 +8,13 @@ class Rent extends API {
 	}
 
 	public function index_get($rent_id = NULL) {
-		$result = $this->rent_model->get_rent($rent_id);
+		$filter_string = $this->input->get('filter', TRUE);
+		$sort = $this->input->get('sortOrder', TRUE);
+		$page_size = $this->input->get('pageSize', TRUE);
+		$page_number = $this->input->get('pageIndex', TRUE);
+		$sort_column = $this->input->get('sortColumn', TRUE);
+
+		$result = $this->rent_model->get_rent($rent_id, $filter_string, $page_size, $page_number, $sort, $sort_column);
 		$this->response($result, API::HTTP_OK);
 	}
 

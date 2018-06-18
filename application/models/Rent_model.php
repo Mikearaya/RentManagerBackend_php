@@ -7,6 +7,38 @@ class Rent_model extends CI_Model {
 		$this->load->database();
 	}
 	
+	public function get_rent($id = NULL, $filter_string, $page_size, $page_number, $sort_order, $sort_column) {
+
+		$result = [];
+		$this->db->select("RENT_ID, CONCAT(first_name,'  ',last_name ) as rented_by, CONCAT(plate_code,'-',plate_number) as plate_number,
+		start_date, return_date");
+		$this->db->from('rent');
+		$this->db->join('vehicle', 'rent.VEHICLE_ID = vehicle.VEHICLE_ID', 'left');
+		$this->db->join('customer', 'customer.CUSTOMER_ID = rent.CUSTOMER_ID', 'left');
+		if(is_null($id)) {
+			$this->db->like('CONCAT(first_name, '.'last_name)', $filter_string);
+			$this->db->or_like('plate_number', $filter_string);
+			$this->db->order_by($sort_column, $sort_order);
+
+			if($page_number === 0) {
+				$start = 0;
+				$end = $page_size;
+			} else {
+				$start = $page_number * $page_size;
+				$end = $start + $page_size;
+			}
+
+			$this->db->limit(1000 , $start);
+			
+				$result_set = $this->db->get();
+		
+			return $result_set->result_array();
+		} else {
+				$this->db->where('RENT_ID',$id );
+				$result = $this->db->get();
+			return $result->row_array();
+		} 
+	}
 	public function insert_rent($rent_detail) {
 		$customer = $this->set_customer_data_model($rent_detail['customer']);
 		$rent = $this->set_rent_data_model($rent_detail);
