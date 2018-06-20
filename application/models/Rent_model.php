@@ -10,8 +10,12 @@ class Rent_model extends CI_Model {
 	public function get_rent($id = NULL, $filter_string, $page_size, $page_number, $sort_order, $sort_column) {
 
 		$result = [];
-		$this->db->select("RENT_ID, CONCAT(first_name,'  ',last_name ) as rented_by, CONCAT(plate_code,'-',plate_number) as plate_number,
-		start_date, return_date");
+		$this->db->select("RENT_ID, CONCAT(first_name,'  ',last_name ) as rented_by, 
+						CONCAT(plate_code,'-',plate_number) as plate_number,start_date, return_date,
+						vehicle.make, vehicle.model, vehicle.type, vehicle.color, vehicle.fuiel_type,
+						vehicle.cc, customer.mobile_number, customer.city, customer.id_type, customer.id_number,
+						customer.nationality, customer.sub_city, customer.wereda, owner_renting_price, initial_payment, 
+						added_on, updated_on, rented_price");
 		$this->db->from('rent');
 		$this->db->join('vehicle', 'rent.VEHICLE_ID = vehicle.VEHICLE_ID', 'left');
 		$this->db->join('customer', 'customer.CUSTOMER_ID = rent.CUSTOMER_ID', 'left');
