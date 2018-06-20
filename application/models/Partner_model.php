@@ -27,11 +27,11 @@ class Partner_model extends CI_Model {
 				$end = $start + $page_size;
 			}
 
-			$this->db->limit(1000 , $start);
-			
-				$result_set = $this->db->get('vehicle_owner');
-		
-			return $result_set->result_array();
+			$this->db->limit($page_size , $start);
+			$result_set = $this->db->get('vehicle_owner');
+			$result['total'] = $this->db->count_all('vehicle_owner');
+			$result['owners'] = $result_set->result_array();
+			return $result;
 		} else {
 				$result =	$this->db->get_where('vehicle_owner', array('OWNER_ID' => $id ));
 			return $result->row_array();

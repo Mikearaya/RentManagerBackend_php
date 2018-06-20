@@ -28,11 +28,11 @@ class Rent_model extends CI_Model {
 				$end = $start + $page_size;
 			}
 
-			$this->db->limit(1000 , $start);
-			
-				$result_set = $this->db->get();
-		
-			return $result_set->result_array();
+			$this->db->limit($page_size , $start);
+			$result_set = $this->db->get();
+			$result['total'] = $this->db->count_all('rent');
+			$result['rents'] = $result_set->result_array();
+			return $result;
 		} else {
 				$this->db->where('RENT_ID',$id );
 				$result = $this->db->get();
@@ -58,6 +58,15 @@ class Rent_model extends CI_Model {
 		}
 	}
 
+	public function delete_rent($deletedRents) {
+		$ids = [];
+		foreach ($deletedRents as $key => $value) {
+			if($key == 'RENT_ID') {
+			$rentIds[] = array(	'RENT_ID' => $value	);
+			}
+		}
+		$query = $this->db->delete('rent', $rentIds);
+	}
 
 	private function set_rent_data_model($rent) {
 		$rent_data_model = array(

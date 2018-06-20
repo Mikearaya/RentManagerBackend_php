@@ -19,6 +19,8 @@ class Vehicle_model extends CI_Model {
 			$this->db->or_like('type', $filter_string);
 			$this->db->order_by($sort_column, $sort);
 
+
+
 			if($page_number === 0) {
 				$start = 0;
 				$end = $page_size;
@@ -27,11 +29,13 @@ class Vehicle_model extends CI_Model {
 				$end = $start + $page_size;
 			}
 
-			$this->db->limit(1000 , $start);
+			$this->db->limit($page_size , $start);
 			
 				$result_set = $this->db->get('vehicle');
+				$result['total'] = $this->db->count_all('vehicle');
+				$result['vehicles'] = $result_set->result_array();
 		
-			return $result_set->result_array();
+			return $result;
 		
 		} else {
 				$this->db->where('VEHICLE_ID', $id);

@@ -17,7 +17,9 @@ class Rent extends API {
 		$result = $this->rent_model->get_rent($rent_id, $filter_string, $page_size, $page_number, $sort, $sort_column);
 		$this->response($result, API::HTTP_OK);
 	}
-
+	public function extend_POST($rentId){
+		
+	}
 	public function index_POST($resnt_id = NULL) {
 		$this->load->library('form_validation');
 		$this->form_validation->set_rules('initial_payment', 'Initial Payment', 'required');
@@ -44,6 +46,11 @@ class Rent extends API {
 			$this->response($result, API::HTTP_OK);
 		}
 
+	}
+
+	public function delete_post($deletedRents) {
+		$result = $this->rent_model->delete_rent($deletedRents);
+		$this->response($result, API::HTTP_OK);
 	}
 
 }
