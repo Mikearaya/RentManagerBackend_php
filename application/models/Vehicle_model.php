@@ -8,10 +8,21 @@ class Vehicle_model extends CI_Model {
 		$this->load->database();
 	}
 
-
-	public function get_vehicle($id = NULL, $filter_string = '', $page_number = 0, $page_size = NULL, $sort = 'ASC', $sort_column = 'VEHICLE_ID') {
+	public function get_vehicle($id = NULL) {
 		
 		if(is_null($id)) {
+				$result_set = $this->db->get('vehicle');
+			return $result_set->result_array();		
+		} else {
+			$this->db->where('VEHICLE_ID', $id);
+			$result_set = $this->db->get('vehicle');	
+			return $result_set->row_array();
+		}
+	}
+
+	public function filter_vehicle($filter_string = '', $page_number = 0, $page_size = NULL, $sort = 'ASC', $sort_column = 'VEHICLE_ID') {
+		
+	
 			$this->db->like('make', $filter_string);
 			$this->db->or_like('model', $filter_string, 'after');
 			$this->db->or_like('year_made', $filter_string);
@@ -37,12 +48,8 @@ class Vehicle_model extends CI_Model {
 		
 			return $result;
 		
-		} else {
-				$this->db->where('VEHICLE_ID', $id);
-				$result_set = $this->db->get('vehicle');
-			
-			return $result_set->row_array();
-		}
+		
+
 	}
 
 
