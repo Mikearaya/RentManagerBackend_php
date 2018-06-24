@@ -17,9 +17,17 @@ class Rent extends API {
 		$result = $this->rent_model->get_rent($rent_id, $filter_string, $page_size, $page_number, $sort, $sort_column);
 		$this->response($result, API::HTTP_OK);
 	}
-	public function extend_POST($rentId){
+
+	public function contrat_info_get($rent_id) {
+		$result = $this->rent_model->get_contrat_info($rent_id);
+		$this->response($result, API::HTTP_OK);
+	}
+
+	public function extend_contrat_POST($rentId){
 		
 	}
+
+
 	public function index_POST($resnt_id = NULL) {
 		$this->load->library('form_validation');
 		

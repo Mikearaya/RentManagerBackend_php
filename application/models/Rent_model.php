@@ -60,7 +60,7 @@ class Rent_model extends CI_Model {
 						$condition['RENT_ID'] = $rent_id;
 						$this->db->insert('vehicle_condition',$condition );
 
-						$result = ($this->db->affected_rows() > 0) ? true : false;
+						$result = ($this->db->affected_rows() > 0) ? $rent_id : false;
 						
 					} else {
 						$result = false;
@@ -113,6 +113,22 @@ class Rent_model extends CI_Model {
 				}
 		return $customer_data_model;
 	}
+	public function get_contrat_info($rent_id) {
+		try {
+				$this->db->select();
+				$this->db->from('rent');
+				$this->db->join('vehicle', 'rent.VEHICLE_ID = vehicle.VEHICLE_ID', 'left');
+				$this->db->join('customer', 'rent.CUSTOMER_ID = customer.CUSTOMER_ID', 'left');
+				$this->db->join('vehicle_condition', 'rent.RENT_ID = vehicle_condition.RENT_ID');
+				$this->db->where('rent.RENT_ID', $rent_id);
+				$result = $this->db->get();
+			return $result->row_array();
+		} catch(Exception $e) {
+			echo $e->getMessage();
+		}
+	}
+
+
 
 	private function set_condition_data_model($vehicle_condition) {
 		$vehicle_condition_data_model = array(
