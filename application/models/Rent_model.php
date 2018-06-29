@@ -105,7 +105,9 @@ class Rent_model extends CI_Model {
 				'nationality' => $customer['nationality'],
 				'country' => $customer['country'],
 				'city' => $customer['city'],
-				'house_no' => $customer['house_no']
+				'house_no' => $customer['house_no'],
+				'hotel_name' => $customer['hotel_name'],
+				'hotel_phone' => $customer['hotel_phone']
 			);
 
 				if(trim($customer['other_phone'])) {
@@ -115,12 +117,20 @@ class Rent_model extends CI_Model {
 	}
 	public function get_contrat_info($rent_id) {
 		try {
-				$this->db->select();
-				$this->db->from('rent');
-				$this->db->join('vehicle', 'rent.VEHICLE_ID = vehicle.VEHICLE_ID', 'left');
-				$this->db->join('customer', 'rent.CUSTOMER_ID = customer.CUSTOMER_ID', 'left');
-				$this->db->join('vehicle_condition', 'rent.RENT_ID = vehicle_condition.RENT_ID');
-				$this->db->where('rent.RENT_ID', $rent_id);
+				$this->db->select("r.RENT_ID, r.VEHICLE_ID, c.CUSTOMER_ID, r.start_date, r.return_date, DATEDIFF( r.return_date, r.start_date) as 'duration', r.initial_payment, r.added_on,
+									r.colateral_deposit, r.rented_price, (DATEDIFF( r.return_date, r.start_date) * r.rented_price) as 'total_payment',
+									((DATEDIFF( r.return_date, r.start_date) * r.rented_price) - r.initial_payment) as 'remaining_payment', v.make, v.model, v.year_made,
+									v.color, v.type, v.chassis_number, v.motor_number, v.fuiel_type, v.cylinder_count, v.libre_no,  v.plate_code, v.plate_number,
+									v.cc, v.total_passanger, c.first_name, c.last_name, c.passport_number, c.nationality, c.country, c.city, c.house_no,
+									c.mobile_number, c.other_phone, c.hotel_name, c.nationality, c.driving_licence_id, c.hotel_phone, v_c.window_controller, v_c.seat_belt, 
+									v_c.spare_tire, v_c.wiper, v_c.crick_wrench, v_c.dashboard_close, v_c.mude_protecter, v_c.spokio_inner, v_c.spokio_outer, v_c.sun_visor,
+									v_c.wind_protecter, v_c.blinker, v_c.mat_inner, v_c.radio, v_c.fuiel_level, v_c.total_kilometer, v_c.crick, v_c.radiator_lid,v_c.fuiel_lid,
+									v_c.cigaret_lighter, v_c.comment   ");
+				$this->db->from('rent  r');
+				$this->db->join('vehicle  v', 'r.VEHICLE_ID = v.VEHICLE_ID');
+				$this->db->join('customer  c', 'r.CUSTOMER_ID = c.CUSTOMER_ID');
+				$this->db->join('vehicle_condition  v_c', 'r.RENT_ID = v_c.RENT_ID');
+				$this->db->where('r.RENT_ID', $rent_id);
 				$result = $this->db->get();
 			return $result->row_array();
 		} catch(Exception $e) {
