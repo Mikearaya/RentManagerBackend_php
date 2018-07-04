@@ -141,29 +141,10 @@ class Rent_model extends CI_Model {
 
 
 	private function set_condition_data_model($vehicle_condition) {
-		$vehicle_condition_data_model = array(
-			'window_controller' => $vehicle_condition['window_controller'],
-			'seat_belt' => $vehicle_condition['seat_belt'],	
-			'spare_tire' => $vehicle_condition['spare_tire'],	
-			'wiper' => $vehicle_condition['wiper'],	
-			'crick_wrench' => $vehicle_condition['crick_wrench'],	
-			'dashboard_close' => $vehicle_condition['dashboard_close'],	
-			'mude_protecter' => $vehicle_condition['mude_protecter'],	
-			'spokio_inner' => $vehicle_condition['spokio_inner'],	
-			'spokio_outer' => $vehicle_condition['spokio_outer'],	
-			'spokio_inner' => $vehicle_condition['spokio_inner'],	
-			'sun_visor' => $vehicle_condition['sun_visor'],	
-			'mat_inner' => $vehicle_condition['mat_inner'],	
-			'wind_protecter' => $vehicle_condition['wind_protecter'],	
-			'blinker' => $vehicle_condition['blinker'],	
-			'radio' => $vehicle_condition['radio'],	
-			'fuiel_level' => $vehicle_condition['fuiel_level'],	
-			'cigaret_lighter' => $vehicle_condition['cigaret_lighter'],	
-			'fuiel_lid' => $vehicle_condition['fuiel_lid'],	
-			'radiator_lid' => $vehicle_condition['radiator_lid'],	
-			'crick' => $vehicle_condition['crick']
-		);
-
+		$vehicle_condition_data_model;
+		foreach ($vehicle_condition as $key => $value) {
+			$vehicle_condition_data_model[$key] = $value;	
+		}		
 				if(isset($vehicle_condition['comment']) && trim($vehicle_condition['comment']) ) {
 					$vehicle_condition_data_model['comment'] = trim($vehicle_condition['comment']);
 				}
