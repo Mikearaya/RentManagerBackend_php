@@ -10,7 +10,7 @@ class Employee extends API {
 	public function index_GET($id = NULL) {
 		$result;
 		
-		$filter_string = $this->input->get('filter');
+		$filter_string = $this->input->get('filter_string');
 		$sort_column = $this->input->get('sort_column');
 		$sort_order = $this->input->get('sort_order');
 		$page_number = $this->input->get('page_index');
@@ -72,7 +72,7 @@ class Employee extends API {
 		$this->form_validation->set_rules('sub_city', 'Sub-City', 'trim|required');
 		$this->form_validation->set_rules('wereda', 'Wereda', 'trim|required|numeric');
 		$this->form_validation->set_rules('house_number', 'House Number', 'trim|required');
-		$this->form_validation->set_rules('phone_number', 'First Name', 'trim|required|numeric|min_length[10]|max_length[12]');
+		$this->form_validation->set_rules('phone_number', 'Phone Number', 'trim|required|numeric|min_length[10]|max_length[12]');
 
 		return $this->form_validation->run();
 	}

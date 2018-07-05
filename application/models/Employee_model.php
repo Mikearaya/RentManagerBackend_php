@@ -18,12 +18,13 @@ class Employee_model extends CI_Model {
 									 $page_size = 100) {
 		$this->db->select();
 		$this->db->from('employee');
-		$this->db->like('first_name', $filter_string);
-		$this->db->like('last_name', $filter_string);
-		$this->db->like('country', $filter_string);
-		$this->db->like('city', $filter_string);
-		$this->db->like('phone_number', $filter_string);
-		$this->db->like('sub_city', $filter_string);
+		$this->db->or_like('first_name', $filter_string);
+		$this->db->or_like('last_name', $filter_string);
+		$this->db->or_like('country', $filter_string);
+		$this->db->or_like('city', $filter_string);
+		$this->db->or_like('phone_number', $filter_string);
+		$this->db->or_like('sub_city', $filter_string);
+		$this->db->order_by($sort_column, $sort_order);
 		$cloned = clone $this->db;
 		$offset;
 		$result['total'] = $cloned->count_all_results();
