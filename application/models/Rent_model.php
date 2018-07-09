@@ -5,25 +5,34 @@ class Rent_model extends CI_Model {
     function __construct() {
 		parent::__construct();
 		$this->load->database();
+		$this->load->helper('date');
+		
 	}
 	
-	public function get_rent($id = NULL, $filter_string, $page_size, $page_number, $sort_order, $sort_column) {
+	public function get_rent($id = NULL, $filter_string = '', $page_size = 100, $page_number = 0, $sort_order = 'ASC', $sort_column = '') {
 
 		$result = [];
-		$this->db->select("RENT_ID, CONCAT(first_name,'  ',last_name ) as rented_by, 
-						CONCAT(plate_code,'-',plate_number) as plate_number,start_date, return_date,
-						vehicle.make, vehicle.model, vehicle.type, vehicle.color, vehicle.fuiel_type,
-						vehicle.cc, customer.mobile_number, customer.city, customer.driving_licence_id, customer.passport_number,
-						customer.nationality, owner_renting_price, initial_payment, customer.hotel_name, customer.hotel_phone,
-						added_on, rent.updated_on, rented_price");
-		$this->db->from('rent');
-		$this->db->join('vehicle', 'rent.VEHICLE_ID = vehicle.VEHICLE_ID', 'left');
-		$this->db->join('customer', 'customer.CUSTOMER_ID = rent.CUSTOMER_ID', 'left');
-		if(is_null($id)) {
-			$this->db->like('CONCAT(first_name, '.'last_name)', $filter_string);
-			$this->db->or_like('plate_number', $filter_string);
-			$this->db->order_by($sort_column, $sort_order);
 
+		$this->db->select("RENT_ID, CONCAT(c.first_name,'  ',c.last_name ) as rented_by, 
+						CONCAT(v.plate_code,'-',v.plate_number) as plate_number, r.start_date, r.return_date,
+						v.make, v.model, v.type, v.color, v.fuiel_type,
+						v.cc, c.mobile_number, c.city, c.driving_licence_id,
+						DATEDIFF(return_date, start_date) as total_days, CONCAT(e.first_name,'  ',e.last_name ) as renting_staff, e.EMPLOYEE_ID,
+						c.passport_number, c.nationality, r.owner_renting_price, r.initial_payment,
+						c.hotel_name, c.hotel_phone, r.added_on, r.updated_on, r.rented_price, r.colateral_deposit");
+		$this->db->from('rent r');
+		$today = date('Y-m-d hh:mm:ss');
+		$array = array('return_date >' => $today);	
+	
+		$this->db->join('vehicle v', 'r.VEHICLE_ID = v.VEHICLE_ID');
+		$this->db->join('employee e', 'r.RENTED_BY = e.EMPLOYEE_ID');
+		$this->db->join('customer c' , 'c.CUSTOMER_ID = r.CUSTOMER_ID');
+		$this->db->where($array);
+		$this->db->order_by($sort_column, $sort_order);
+		if(is_null($id)) {
+		$this->db->where("(CONCAT(c.first_name,' ',c.last_name) LIKE '%".$filter_string."%' OR v.plate_number
+							 LIKE '%".$filter_string."%' )", NULL, FALSE);
+			
 			if($page_number === 0) {
 				$start = 0;
 				$end = $page_size;
@@ -31,10 +40,12 @@ class Rent_model extends CI_Model {
 				$start = $page_number * $page_size;
 				$end = $start + $page_size;
 			}
-
+			$cloned = clone $this->db;
+		
 			$this->db->limit($page_size , $start);
 			$result_set = $this->db->get();
-			$result['total'] = $this->db->count_all('rent');
+			$result['total'] = $cloned->count_all_results();
+		
 			$result['rents'] = $result_set->result_array();
 			return $result;
 		} else {
@@ -45,15 +56,9 @@ class Rent_model extends CI_Model {
 	}
 	public function add_rent($rent_detail) {
 		$result = false;
-		$customer = $this->set_customer_data_model($rent_detail['customer']);
 		$rent = $this->set_rent_data_model($rent_detail);
 		$condition = $this->set_condition_data_model($rent_detail['condition']);
 
-		$this->db->insert('customer', $customer);
-		$customer_id = $this->db->insert_id();
-	
-			if($customer_id) {
-				$rent['CUSTOMER_ID'] = $customer_id;				
 				$this->db->insert('rent', $rent);
 				$rent_id = $this->db->insert_id();
 					if ($rent_id) {
@@ -65,9 +70,7 @@ class Rent_model extends CI_Model {
 					} else {
 						$result = false;
 					}
-			} else {
-						$result =  false;
-			}
+		
 		return $result;
 	}
 
@@ -84,40 +87,23 @@ class Rent_model extends CI_Model {
 	private function set_rent_data_model($rent) {
 		$rent_data_model = array(
 			'VEHICLE_ID' => $rent['VEHICLE_ID'],
+			'CUSTOMER_ID' => $rent['CUSTOMER_ID'],
+			'RENTED_BY' => $rent['RENTED_BY'],
 			'start_date' => $rent['start_date'],
 			'return_date' => $rent['return_date'],
 			'owner_renting_price' => $rent['owner_renting_price'],
 			'initial_payment' => $rent['initial_payment'],
 			'owner_renting_price' => $rent['owner_renting_price'],
-			'rented_price' => $rent['rented_price']
+			'rented_price' => $rent['rented_price'],
+			'colateral_deposit' => $rent['colateral_deposit']
 		);
 		return $rent_data_model;
 	}
 
-	private function set_customer_data_model($customer) {
-
-			$customer_data_model = array(
-				'first_name' => $customer['first_name'],
-				'last_name' => $customer['last_name'],
-				'passport_number' => $customer['passport_number'],
-				'driving_licence_id' => $customer['driving_licence_id'],
-				'mobile_number' => $customer['mobile_number'],
-				'nationality' => $customer['nationality'],
-				'country' => $customer['country'],
-				'city' => $customer['city'],
-				'house_no' => $customer['house_no'],
-				'hotel_name' => $customer['hotel_name'],
-				'hotel_phone' => $customer['hotel_phone']
-			);
-
-				if(trim($customer['other_phone'])) {
-					$customer_data_model['other_phone'] = $customer['other_phone'];
-				}
-		return $customer_data_model;
-	}
 	public function get_contrat_info($rent_id) {
 		try {
-				$this->db->select("r.RENT_ID, r.VEHICLE_ID, c.CUSTOMER_ID, r.start_date, r.return_date, DATEDIFF( r.return_date, r.start_date) as 'duration', r.initial_payment, r.added_on,
+				$this->db->select("r.RENT_ID, r.VEHICLE_ID, c.CUSTOMER_ID, DATE(r.start_date) as start_date, time(r.start_date) as start_time , DATE(r.return_date) as return_date, TIME(r.return_date) as return_time,
+									 DATEDIFF( r.return_date, r.start_date) as 'duration', r.initial_payment, r.added_on,
 									r.colateral_deposit, r.rented_price, (DATEDIFF( r.return_date, r.start_date) * r.rented_price) as 'total_payment',
 									((DATEDIFF( r.return_date, r.start_date) * r.rented_price) - r.initial_payment) as 'remaining_payment', v.make, v.model, v.year_made,
 									v.color, v.type, v.chassis_number, v.motor_number, v.fuiel_type, v.cylinder_count, v.libre_no,  v.plate_code, v.plate_number,
@@ -125,10 +111,11 @@ class Rent_model extends CI_Model {
 									c.mobile_number, c.other_phone, c.hotel_name, c.nationality, c.driving_licence_id, c.hotel_phone, v_c.window_controller, v_c.seat_belt, 
 									v_c.spare_tire, v_c.wiper, v_c.crick_wrench, v_c.dashboard_close, v_c.mude_protecter, v_c.spokio_inner, v_c.spokio_outer, v_c.sun_visor,
 									v_c.wind_protecter, v_c.blinker, v_c.mat_inner, v_c.radio, v_c.fuiel_level, v_c.total_kilometer, v_c.crick, v_c.radiator_lid,v_c.fuiel_lid,
-									v_c.cigaret_lighter, v_c.comment   ");
+									v_c.cigaret_lighter, v_c.comment , CONCAT(e.first_name, ' ', e.last_name) as renting_employee  ");
 				$this->db->from('rent  r');
 				$this->db->join('vehicle  v', 'r.VEHICLE_ID = v.VEHICLE_ID');
 				$this->db->join('customer  c', 'r.CUSTOMER_ID = c.CUSTOMER_ID');
+				$this->db->join('employee  e', 'r.RENTED_BY = e.EMPLOYEE_ID');
 				$this->db->join('vehicle_condition  v_c', 'r.RENT_ID = v_c.RENT_ID');
 				$this->db->where('r.RENT_ID', $rent_id);
 				$result = $this->db->get();

@@ -17,6 +17,12 @@ class Customer_Model extends CI_Model {
 
 	}
 
+	public function get_all_customer($id) {
+		$result = $this->db->get('customer');
+			return $result->result_array();
+
+	}
+
 	public function filter_customers($filter_string = '', $sort_column = '', $sort_order = 'ASC', $page_number = 0, $page_size = 20) {
 		$this->db->like('first_name', $filter_string);
 		$this->db->or_like('last_name', $filter_string);

@@ -8,23 +8,30 @@ class Vehicle extends API {
 			parent::__construct();
 			$this->load->model('vehicle_model');
 		}
-
-		//hadeles request for getting single or muultiple vehicle record/s
-		//based on wether the id field is set or not. 
 		public function index_get($id = NULL) {
+			if(!$id){
 			$result = $this->vehicle_model->get_vehicle($id);
+			$this->response($result, API::HTTP_OK);
+			} else {
+				$this->filter_get();
+			}
+
+		}
+
+		public function available_get() {
+			$result = $this->vehicle_model->available_vehicles();
 			$this->response($result, API::HTTP_OK);
 		}
 
 		public function filter_get() {
-
+			$owner_id = $this->input->get('owner_id', TRUE);
 			$filter_string = $this->input->get('filter', TRUE);
 			$sort = $this->input->get('sortOrder', TRUE);
 			$page_size = $this->input->get('pageSize', TRUE);
 			$page_number = $this->input->get('pageNumber', TRUE);
 			$sort_column = $this->input->get('sortColumn', TRUE);
 
-			$result = $this->vehicle_model->filter_vehicle($filter_string, $page_number, $page_size, $sort, $sort_column);
+			$result = $this->vehicle_model->filter_vehicle($owner_id, $filter_string, $page_number, $page_size, $sort, $sort_column);
 			$this->response($result, API::HTTP_OK);
 		}
 

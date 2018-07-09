@@ -13,7 +13,6 @@ class Rent extends API {
 		$page_size = $this->input->get('pageSize', TRUE);
 		$page_number = $this->input->get('pageIndex', TRUE);
 		$sort_column = $this->input->get('sortColumn', TRUE);
-
 		$result = $this->rent_model->get_rent($rent_id, $filter_string, $page_size, $page_number, $sort, $sort_column);
 		$this->response($result, API::HTTP_OK);
 	}
@@ -28,21 +27,22 @@ class Rent extends API {
 	}
 
 
-	public function index_POST($resnt_id = NULL) {
+	public function index_POST() {
 		$this->load->library('form_validation');
 		
 		self::set_rent_basics_validations();
-		self::set_customer_validations();
 		self::set_condition_validations();
 
 		if($this->form_validation->run() === FALSE ) {
-			$this->response(validation_errors(), API::HTTP_OK);
+			$this->response($this->validation_errors(), API::HTTP_BAD_REQUEST);
 		} else {
 			$result = $this->rent_model->add_rent($this->input->post());
 			$this->response($result, API::HTTP_OK);
 		}
 
 	}
+
+	
 
 	public function delete_post($deletedRents) {
 		$result = $this->rent_model->delete_rent($deletedRents);
@@ -61,19 +61,6 @@ class Rent extends API {
 	}
 
 
-	private function set_customer_validations() {
-
-		$this->form_validation->set_rules('customer[first_name]', 'First Name', 'required');
-		$this->form_validation->set_rules('customer[last_name]', 'Last Name', 'required');
-		$this->form_validation->set_rules('customer[nationality]', 'Nationality', 'required');
-		$this->form_validation->set_rules('customer[city]', 'Rent Ending Date', 'required');
-		$this->form_validation->set_rules('customer[country]', 'Country', 'required');
-		$this->form_validation->set_rules('customer[house_no]', 'House Number', 'required');
-		$this->form_validation->set_rules('customer[mobile_number]', 'Mobile Number', 'required');
-		$this->form_validation->set_rules('customer[passport_number]', 'Passport Number', 'required');
-		$this->form_validation->set_rules('customer[driving_licence_id]', 'Driving Licence Id', 'required');
-
-	}
 
 	private function set_condition_validations() {
 

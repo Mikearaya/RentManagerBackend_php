@@ -20,17 +20,15 @@ class Vehicle_model extends CI_Model {
 		}
 	}
 
-	public function filter_vehicle($filter_string = '', $page_number = 0, $page_size = NULL, $sort = 'ASC', $sort_column = 'VEHICLE_ID') {
-		
-	
+	public function filter_vehicle($owner_id  = NULL, $filter_string = '', $page_number = 0, $page_size = NULL, $sort = 'ASC', $sort_column = 'VEHICLE_ID') {
+			
 			$this->db->like('make', $filter_string);
 			$this->db->or_like('model', $filter_string, 'after');
 			$this->db->or_like('year_made', $filter_string);
 			$this->db->or_like('color', $filter_string, 'after');
 			$this->db->or_like('type', $filter_string);
+		
 			$this->db->order_by($sort_column, $sort);
-
-
 
 			if($page_number === 0) {
 				$start = 0;
@@ -39,17 +37,35 @@ class Vehicle_model extends CI_Model {
 				$start = $page_number * $page_size;
 				$end = $start + $page_size;
 			}
-
+			$cloned = $this->db;
+			$result['total'] = $cloned->count_all_results('vehicle');
 			$this->db->limit($page_size , $start);
-			
-				$result_set = $this->db->get('vehicle');
-				$result['total'] = $this->db->count_all('vehicle');
+			$result_set;	
+					if($owner_id) {
+				$result_set = $this->db->get_where('vehicle', array('OWNER_ID' => $owner_id));
+
+					} else {
+						$result_set = $this->db->get_where('vehicle');
+					}
 				$result['vehicles'] = $result_set->result_array();
 		
 			return $result;
-		
-		
+	}
 
+	public function available_vehicles() {
+		$today = date('Y-m-d');
+		$this->db->select("vehicle.VEHICLE_ID, OWNER_ID, make, model, year_made, chassis_number, motor_number, color, type,
+						plate_code, plate_number, libre_no, fuiel_type, cc, total_passanger, cylinder_count" );
+		$this->db->from('vehicle');
+		$this->db->join('rent', 'rent.VEHICLE_ID = vehicle.VEHICLE_ID', "left");
+
+		$today = date('Y-m-d hh:mm:ss');
+		$where = array('return_date <' => $today);	
+		$or_where = array('return_date = ' => NULL);
+		$this->db->where($where);
+		$this->db->or_where($or_where);
+		$query = $this->db->get();
+		return $query->result_array();
 	}
 
 

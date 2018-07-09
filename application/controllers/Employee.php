@@ -10,21 +10,24 @@ class Employee extends API {
 	public function index_GET($id = NULL) {
 		$result;
 		
-		$filter_string = $this->input->get('filter_string');
-		$sort_column = $this->input->get('sort_column');
-		$sort_order = $this->input->get('sort_order');
-		$page_number = $this->input->get('page_index');
-		$page_size = $this->input->get('page_size');
-
 		if($id) {
-			$result = $this->employee_model->get_employee($id);
+			$result = $this->employee_model->get_employee_by_id($id);
 		} else {
-			$result = $this->employee_model->filter_employees($filter_string, $sort_column, $sort_order, $page_number, $page_size);
+			$result = $this->employee_model->get_all_employees();
 		}
 
 		($result) ? $this->response($result, API::HTTP_OK) : $this->response($result, API::HTTP_NOT_FOUND);
 	}
 
+	public function filter_get() {
+		$filter_string = $this->input->get('filter_string');
+		$sort_column = $this->input->get('sort_column');
+		$sort_order = $this->input->get('sort_order');
+		$page_number = $this->input->get('page_index');
+		$page_size = $this->input->get('page_size');
+		$result = $this->employee_model->filter_employees($filter_string, $sort_column, $sort_order, $page_number, $page_size);
+		($result) ? $this->response($result, API::HTTP_OK) : $this->response($result, API::HTTP_NOT_FOUND);
+	}
 	public function add_POST() {
 		$this->load->library('form_validation');
 		if($this->validate_employee_data()) {
@@ -35,7 +38,7 @@ class Employee extends API {
 				$this->response(false, API::HTTP_BAD_REQUEST);
 			}
 		} else {
-			$this->response($this->form_validation->error_array(), API::HTTP_BAD_REQUEST);
+			$this->response(c, API::HTTP_BAD_REQUEST);
 		}
 
 	}

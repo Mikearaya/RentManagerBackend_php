@@ -11,6 +11,11 @@ class Employee_model extends CI_Model {
 		return ($result->num_rows() == 1) ? $result->row_array() : false;
 	}
 
+	public function get_all_employees() {
+		$result = $this->db->get('employee');		
+		return  $result->result_array();
+	}
+
 	public function filter_employees($filter_string = '', 
 									$sort_column = 'first_name',
 									 $sort_order = 'ASC', 
