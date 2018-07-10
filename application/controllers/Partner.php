@@ -24,15 +24,9 @@ class Partner extends API {
 
 	public function index_post($id = NULL) {
 		$this->load->library('form_validation');
-		$this->form_validation->set_rules('first_name', 'First Name', 'required');
-		$this->form_validation->set_rules('last_name', 'Last Name', 'required');
-		$this->form_validation->set_rules('mobile_number', 'Mobile Number', 'required');
-		$this->form_validation->set_rules('city', 'City', 'required');
-		$this->form_validation->set_rules('sub_city', 'Sub-City', 'required');
-		$this->form_validation->set_rules('wereda', 'Wereda', 'required');
-
+		$this->set_validation_rules();
 		if($this->form_validation->run() === FALSE ) {
-			$this->response(validation_errors(), API::HTTP_OK);
+			$this->response($this->validation_errors(), API::HTTP_BAD_REQUEST);
 		} else {
 			$result = '';
 			if($id) {
@@ -40,8 +34,35 @@ class Partner extends API {
 			} else {
 				$result = $this->partner_model->add_partner($this->input->post());
 			}
-			$this->response($result, API::HTTP_OK);
+
+
+			if($result) {
+				$this->response($result, API::HTTP_CREATED);
+			} else {
+				$this->response("Error occured while saving Partners Information!", API::HTTP_BAD_REQUEST);
+			}
 		}
+
+	}
+
+	
+	private function set_validation_rules() {
+		$this->form_validation->set_rules('first_name', 'First Name', 'required');
+		$this->form_validation->set_rules('last_name', 'Last Name', 'required');
+		$this->form_validation->set_rules('mobile_number', 'Mobile Number', 
+											'trim|required|numeric|min_length[10]|max_length[12]',
+											array(
+												'required' => '%s is Required',
+												'numeric' => '%s should contain numbers only',
+												'min_length' => '%s is short Valid number Should be 10 or 12 digits',
+												'max_length' => '%s long Valid number Should be 10 or 12 digits',
+												//'is_unique' => 'Provided %s Already exsists'
+											)
+																								);
+		$this->form_validation->set_rules('city', 'City', 'required');
+		$this->form_validation->set_rules('sub_city', 'Sub-City', 'required');
+		$this->form_validation->set_rules('wereda', 'Wereda', 'required');
+		$this->form_validation->set_rules('house_number', 'House Number', 'required');
 
 	}
 }

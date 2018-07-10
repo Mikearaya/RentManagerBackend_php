@@ -38,12 +38,35 @@ class Partner_model extends CI_Model {
 		} 
 	}
 
-	public function add_partner($partner) {
-		return $this->db->insert('vehicle_owner', $partner);
+	public function add_partner($new_partner) {
+		
+		$partner = $this->set_data_model($new_partner);
+		$this->db->insert('vehicle_owner', $partner);
+
+		if($this->db->affected_rows() == 1) {
+			$partner['OWNER_ID'] = $this->db->insert_id();  
+			return $partner;
+		} else {
+			return false;
+		}
 	}
 	public function update_partner($partner, $id) {
 		$this->db->where('OWNER_ID', $id);
 		return $this->db->update('vehicle_owner', $partner);
+	}
+
+	private function set_data_model($owner) {
+		$data_model = array(
+			'first_name' => $owner['first_name'],
+			'last_name' => $owner['last_name'],
+			'mobile_number' => $owner['mobile_number'],
+			'city' => $owner['city'],
+			'sub_city' => $owner['sub_city'],
+			'wereda' => $owner['wereda'],
+			'house_number' => $owner['house_number']
+		);
+
+		return $data_model;
 	}
 }
 ?>
