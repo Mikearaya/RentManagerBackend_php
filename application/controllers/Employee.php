@@ -11,7 +11,7 @@ class Employee extends API {
 		$result;
 		
 		if($id) {
-			$result = $this->employee_model->get_employee_by_id($id);
+			$result = $this->employee_model->get_employee($id);
 		} else {
 			$result = $this->employee_model->get_all_employees();
 		}

@@ -26,28 +26,28 @@ class Customer extends API {
 
 
 	public function add_POST() {
+		$this->load->library('form_validation');
 		$this->validate_customer_data();
-
+		$this->form_validation->set_rules('driving_licence_id', 'Driving License ID', 'trim|required|is_unique[customer.driving_licence_id]');
+		$this->form_validation->set_rules('mobile_number', 'Main Mobile Number', 'trim|required|is_unique[customer.mobile_number]');
 		if($this->form_validation->run() === FALSE) {
-			$this->response(validation_errors(), API::HTTP_BAD_REQUEST);
+			$this->response($this->validation_errors(), API::HTTP_BAD_REQUEST);
 		} else {
 			$result = $this->customer_model->add_customer($this->input->post());
-			($result) ? $this->response($result, API::HTTP_CREATED) : $this->$response($result, API::HTTP_BAD_REQUEST);
+			($result) ? $this->response($result, API::HTTP_CREATED) : $this->$response(["Unknown Error Occured While Saving Client Information"], API::HTTP_BAD_REQUEST);
 		}
 	}
 
 	public function update_POST($id) {
-		if($id) {
+		$this->load->library('form_validation');
 			$this->validate_customer_data();
+			
 			if($this->form_validation->run() === FALSE) {
-				$this->response(validation_errors(), API::HTTP_BAD_REQUEST);
+				$this->response($this->validation_errors(), API::HTTP_BAD_REQUEST);
 			} else {
 				$result = $this->customer_model->update_customer( $id, $this->input->post());
-				($result) ? $this->response($result, API::HTTP_OK) : $this->response($result, API::HTTP_BAD_REQUEST);
+				($result) ? $this->response($result, API::HTTP_CREATED) : $this->response(["Unknown Error Occured While Saving Client Information"], API::HTTP_BAD_REQUEST);
 			}
-		} else {
-			$this->response("ID Should Be Set", API::HTTP_BAD_REQUEST);
-		}
 	}
 
 	public function delete_POST() {
@@ -68,16 +68,14 @@ class Customer extends API {
 	}
 
 
-	private function validate_customer_data() {
-		$this->load->library('form_validation');
-		$this->form_validation->set_rules('first_name', 'Customer First Name', 'required');
-		$this->form_validation->set_rules('last_name', 'Customer Last Name', 'required');
-		$this->form_validation->set_rules('driving_licence_id', 'Driving License ID', 'required');
-		$this->form_validation->set_rules('nationality', 'Nationality', 'required');
-		$this->form_validation->set_rules('country', 'Country', 'required');
-		$this->form_validation->set_rules('city', 'City', 'required');
-		$this->form_validation->set_rules('mobile_number', 'Main Mobile Number', 'required');
-		$this->form_validation->set_rules('house_no', 'House Number', 'required');
+	private function validate_customer_data() {		
+		$this->form_validation->set_rules('first_name', 'Customer First Name', 'trim|required');
+		$this->form_validation->set_rules('last_name', 'Customer Last Name', 'trim|required');
+		
+		$this->form_validation->set_rules('nationality', 'Nationality', 'trim|required');
+		$this->form_validation->set_rules('country', 'Country', 'trim|required');
+		$this->form_validation->set_rules('city', 'City', 'trim|required');
+		$this->form_validation->set_rules('house_no', 'House Number', 'trim|required');
 
 	}
 
