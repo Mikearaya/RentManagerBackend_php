@@ -35,10 +35,10 @@ class Employee extends API {
 			if(is_array($result)) {
 				$this->response($result, API::HTTP_CREATED);
 			} else {
-				$this->response(false, API::HTTP_BAD_REQUEST);
+				$this->response(["Unknown Error Occured Try Again"], API::HTTP_BAD_REQUEST);
 			}
 		} else {
-			$this->response(c, API::HTTP_BAD_REQUEST);
+			$this->response($this->validation_errors(), API::HTTP_BAD_REQUEST);
 		}
 
 	}
@@ -50,10 +50,10 @@ class Employee extends API {
 			if($result) {
 				$this->response($result, API::HTTP_CREATED);
 			} else {
-				$this->response(false, API::HTTP_BAD_REQUEST);
+				$this->response(["Unknown Error Occured Try Again"], API::HTTP_BAD_REQUEST);
 			}
 		} else {
-			$this->response(error_array(), API::HTTP_BAD_REQUEST);
+			$this->response($this->validation_errors(), API::HTTP_BAD_REQUEST);
 		}
 
 	}
