@@ -70,7 +70,9 @@ class Vehicle_model extends CI_Model {
 
 
 	public function add_vehicle($vehicle) {
+
 			$data_model = $this->set_vehicle_data_model($vehicle);
+			$data_model['OWNER_ID'] = $vehicle['OWNER_ID'];
 			$result = $this->db->insert('vehicle', $data_model);
 			
 				if($this->db->affected_rows() == 1 ) {
@@ -118,7 +120,7 @@ class Vehicle_model extends CI_Model {
 
 	private function set_vehicle_data_model($vehicle) {
 		return array(
-			'OWNER_ID' => $vehicle['OWNER_ID'],
+
 			'make' => $vehicle['make'],
 			'model' => $vehicle['model'],
 			'year_made' => $vehicle['year_made'],
