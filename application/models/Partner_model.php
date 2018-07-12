@@ -55,6 +55,21 @@ class Partner_model extends CI_Model {
 		return $this->db->update('vehicle_owner', $partner);
 	}
 
+	public function delete_partner($id) {
+
+		$deletedIds = [];
+		try{
+		foreach ($id as $key => $value) {
+			$deletedIds[] = $value;
+		}
+		$this->db->where_in('OWNER_ID', $deletedIds);
+		$result = $this->db->delete('vehicle_owner');
+		return ($this->db->affected_rows() > 0) ? true : false;
+		} catch(Exception $e) {			
+			return false;
+		}
+	}
+
 	private function set_data_model($owner) {
 		$data_model = array(
 			'first_name' => $owner['first_name'],

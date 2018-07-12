@@ -51,8 +51,8 @@ class Customer extends API {
 	}
 
 	public function delete_POST() {
-		if($this->input->post('deletedIds')) {
-			$result = $this->customer_model->delete_customers($this->input->post('deletedIds'));
+		if($this->input->post('id')) {
+			$result = $this->customer_model->delete_customers($this->input->post('id'));
 			($result) ? $this->response($result, API::HTTP_OK) : $this->response($result, API::HTTP_BAD_REQUEST);
 		} else {
 			$this->response("ID Should Be Set", API::HTTP_BAD_REQUEST);

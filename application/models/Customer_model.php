@@ -83,34 +83,28 @@ class Customer_Model extends CI_Model {
 	public function delete_customers($id) {
 		$ids = [];
 		$result = NULL;
-
-		foreach ($id as $key => $value) {
-			$this->db->where('CUSTOMER_ID', $value);
-			$result = $this->db->delete('customer');
-			if(!$result) {
-				break;
-			}
-		}
-			if($result) {
-				
-				return true;
-			} else {
-				return false;
-			}
-			
 	
+		foreach($id as $key => $value) {
+			$ids[] = $value;
+		}
+
+		$this->db->where_in('CUSTOMER_ID', $ids);
+		$result = $this->db->delete('customer');
+		return ($result) ? true : false;
 	}
+	
 	public function delete_customer($id) {
 		$ids = [];
 		$result = NULL;
-			$this->db->where('CUSTOMER_ID', $id);
-			$result = $this->db->delete('customer');
-			if($result) {				
-				return true;
-			} else {
-				return false;
-			}			
+			try {
+					$this->db->where('CUSTOMER_ID', $id);
+					$result = $this->db->delete('customer');
+
+				return ($this->db->affected_rows() > 0) ? true : false;
 	
+			} catch (Exception $e) {
+				return false;
+			}
 	}
 
 

@@ -98,24 +98,21 @@ class Vehicle_model extends CI_Model {
 	}
 
 	public function delete_vehicle($id) {
-		$ids = [];
+		$deletedIds = [];
 		$result = NULL;
-
+		try {
 		foreach ($id as $key => $value) {
-			$this->db->where('VEHICLE_ID', $value);
-			$result = $this->db->delete('vehicle');
-			if(!$result) {
-				break;
-			}
+				$deletedIds[] = $value;		
 		}
-			if($result) {
-				
-				return true;
-			} else {
-				return false;
-			}
-			
-	
+			$this->db->where_in('VEHICLE_ID', $deletedIds);
+			$result = $this->db->delete('vehicle');
+		
+			return ($this->db->affected_rows() > 0) ? true : false;
+		
+		} catch(Exception $e) {
+			return false;
+		}
+		
 	}
 
 	private function set_vehicle_data_model($vehicle) {

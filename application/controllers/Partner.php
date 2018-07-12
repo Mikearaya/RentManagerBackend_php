@@ -45,6 +45,21 @@ class Partner extends API {
 
 	}
 
+	public function delete_POST() {
+		if($this->input->post('id')) {
+			
+			$result = $this->partner_model->delete_partner($this->input->post('id'));
+			if($result) {
+				$this->response($result, API::HTTP_OK);
+			} else {
+				$this->response($result, API::HTTP_BAD_REQUEST);
+			}
+
+		} else {
+			$this->response("No Id Provided for Delete", API::HTTP_BAD_REQUEST);
+		}
+	}
+
 	
 	private function set_validation_rules() {
 		$this->form_validation->set_rules('first_name', 'First Name', 'required');

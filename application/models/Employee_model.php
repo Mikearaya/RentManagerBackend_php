@@ -70,8 +70,17 @@ class Employee_model extends CI_Model {
 
 
 	public function delete_employee($id) {
-		$this->db->where('EMPLOYEE_ID', $id);
-		return $this->db->delete('employee');
+		$deletedIds = [];
+		try {
+			foreach($id as $key => $value) {
+				$deletedIds[] = $value;
+			}
+			$this->db->where_in('EMPLOYEE_ID', $deletedIds);
+			$this->db->delete('employee');
+		return ($this->db->affected_rows() > 0) ? true : false;
+		} catch (Exception $e) { 
+			return false;
+		}
 	}
 }
 

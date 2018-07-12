@@ -75,13 +75,17 @@ class Rent_model extends CI_Model {
 	}
 
 	public function delete_rent($deletedRents) {
-		$ids = [];
-		foreach ($deletedRents as $key => $value) {
-			if($key == 'RENT_ID') {
-			$rentIds[] = array(	'RENT_ID' => $value	);
-			}
+		$deletedIds = [];
+		try {
+				foreach ($deletedRents as $key => $value) {
+					$deletedIds[] = $value;
+				}
+				$this->db->where_in('RENT_ID', $deletedIds );
+				$query = $this->db->delete('rent');
+				return ($this->db->affected_rows() > 0) ? true : false;
+		} catch(Exception $e) {
+			return false;
 		}
-		$query = $this->db->delete('rent', $rentIds);
 	}
 
 	private function set_rent_data_model($rent) {

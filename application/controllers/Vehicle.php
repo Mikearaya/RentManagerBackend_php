@@ -100,15 +100,18 @@ class Vehicle extends API {
 		
 		//handels delete request for a single vehicle if id is passed on url or
 		//multiple vehicles if the ids were passed as an array in http POST request
-		public function index_delete($id = NULL) {
-			if($id) {
-				$result = $this->vehicle_model->delete_vehicle(array('VEHICLE_ID'=> $id));
-			} else if($this->input->post()) {
-				$result = $this->vehicle_model->delete_vehicle($this->input->post());
+		public function delete_POST() {
+			if($this->input->post('id')) {
+				$result = $this->vehicle_model->delete_vehicle($this->input->post('id'));
+				if($result) {
+					$this->response(true, API::HTTP_OK);
+				} else {
+					$this->response(false, API::HTTP_BAD_REQUEST);
+				}
 			} else {
-				$result = false;
+				$this->response(["ID not Provided For Deleting"], API::HTTP_BAD_REQUEST);
 			}
-			$this->response($result, API::HTTP_OK);
+			
 		}
 }
 

@@ -44,9 +44,17 @@ class Rent extends API {
 
 	
 
-	public function delete_post($deletedRents) {
-		$result = $this->rent_model->delete_rent($deletedRents);
-		$this->response($result, API::HTTP_OK);
+	public function delete_POST($deletedRents) {
+		if($this->input->post('id')) {
+		$result = $this->rent_model->delete_rent($this->input->post('id'));
+			if($result) {
+				$this->response(['Rent Deleted Successfuly'], API::HTTP_OK);
+			} else {
+				$this->response(['error Deleting Rent'], API::HTTP_NOT_MODIFIED);
+			}
+		} else {
+			$this->response(['Id fild not provided for delete'], API::HTTP_BAD_REQUEST);
+		}
 	}
 
 	private function set_rent_basics_validations() {

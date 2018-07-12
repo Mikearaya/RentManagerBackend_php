@@ -58,8 +58,8 @@ class Employee extends API {
 
 	}
 
-	public function index_DELETE($id) {
-			$result = $this->employee_model->delete_employee($id);	
+	public function delete_POST() {
+			$result = $this->employee_model->delete_employee($this->input->post('id'));	
 			if($result) {
 				$this->response($result, API::HTTP_OK);
 			} else {
