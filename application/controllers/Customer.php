@@ -72,7 +72,7 @@ class Customer extends API {
 		$this->form_validation->set_rules('first_name', 'Customer First Name', 'trim|required');
 		$this->form_validation->set_rules('last_name', 'Customer Last Name', 'trim|required');
 		
-		$this->form_validation->set_rules('nationality', 'Nationality', 'trim|required');
+		$this->form_validation->set_rules('nationality', 'Nationality', 'trim');
 		$this->form_validation->set_rules('country', 'Country', 'trim|required');
 		$this->form_validation->set_rules('city', 'City', 'trim|required');
 		$this->form_validation->set_rules('house_no', 'House Number', 'trim|required');

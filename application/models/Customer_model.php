@@ -57,24 +57,25 @@ class Customer_Model extends CI_Model {
 
 
 	public function add_customer($customer) {
-		$result = $this->db->insert('customer', $customer);
+		$new_customer = $this->set_customer_data_model($customer);
+		$result = $this->db->insert('customer', $new_customer);
 		
 			if($this->db->affected_rows() == 1 ) {
-				 $customer['CUSTOMER_ID'] =  $this->db->insert_id();
-				 return $customer;
+				 $new_customer['CUSTOMER_ID'] =  $this->db->insert_id();
+				 return $new_customer;
 			 } else {
 				return false;
 			 }
 	}
 
 	public function update_customer( $id, $customer) {
-
+		$updated_customer = $this->set_customer_data_model($customer);
 			$this->db->where('CUSTOMER_ID', $id );
-		$customer['CUSTOMER_ID'] = $id;
-			$result = $this->db->update('customer', $customer);
+		$updated_customer['CUSTOMER_ID'] = $id;
+			$result = $this->db->update('customer', $updated_customer);
 		if($this->db->affected_rows() == 1 ) {
-				$customer['CUSTOMER_ID'] =  $id;
-			return $customer;
+				$updated_customer['CUSTOMER_ID'] =  $id;
+			return $updated_customer;
 		 } else {
 			return false;
 		 }
@@ -105,6 +106,30 @@ class Customer_Model extends CI_Model {
 			} catch (Exception $e) {
 				return false;
 			}
+	}
+	private function set_customer_data_model($customer) {
+		$data_model = array(
+			'first_name' => $customer['first_name'],
+			'last_name' => $customer['last_name'],
+			'country' => $customer['country'],
+			'city' => $customer['city'],
+			'mobile_number' => $customer['mobile_number'],
+			'house_no' => $customer['house_no'],
+			'driving_licence_id' => $customer['driving_licence_id'],
+		);
+
+		if(isset($customer['nationality']) && trim($customer['nationality'])) {
+			$data_model['nationality'] = trim($customer['nationality']);
+			$data_model['passport_number'] = trim($customer['passport_number']);
+			$data_model['hotel_name'] = trim($customer['hotel_name']);
+			$data_model['hotel_phone'] = trim($customer['hotel_phone']);
+
+		}
+		if(isset($customer['other_phone']) && trim($customer['other_phone'])) {
+			$data_model['other_phone'] = trim($customer['other_phone']);
+		}
+
+		return $data_model;
 	}
 
 
