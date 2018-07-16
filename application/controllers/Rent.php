@@ -22,7 +22,39 @@ class Rent extends API {
 		$this->response($result, API::HTTP_OK);
 	}
 
-	public function extend_contrat_POST($rentId){
+	public function extend_rent_POST($rentId) {
+		$this->load->library('form_validation');
+		$this->form_validation->set_rules('extended_days', 'Number of Extended Days', 'trim|required|numeric', 
+															array(
+																'required' => '%s is Reqired',
+																'numeric' => '%s Should be only digits'
+															));
+		$this->form_validation->set_rules('initial_payment', 'Initial Payment', 'trim|required|numeric', 
+		array(
+			'required' => '%s is Reqired',
+			'numeric' => '%s Should be only digits'
+		));
+		$this->form_validation->set_rules('owner_renting_price', 'Owner Renting Price', 'trim|required|numeric', 
+		array(
+			'required' => '%s is Reqired',
+			'numeric' => '%s Should be only digits'
+		));
+		$this->form_validation->set_rules('rented_price', 'Actual Renting Price', 'trim|required|numeric', 
+		array(
+			'required' => '%s is Reqired',
+			'numeric' => '%s Should be only digits'
+		));
+		if ($this->form_validation->run() === FALSE) {
+			$this->response($this->validation_errors(), API::HTTP_BAD_REQUEST);
+		} else {
+			$result = $this->rent_model->extend_rent($this->input->post());
+
+			if ($result ) {
+				$this->response($result, API::HTTP_OK);
+			} else {
+				$this->response(["Something Wrong Happend When Trying to Extend rent, Try Again"], API::HTTP_BAD_REQUEST);
+			}
+		}
 		
 	}
 
