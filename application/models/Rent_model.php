@@ -58,10 +58,11 @@ class Rent_model extends CI_Model {
 	public function add_rent($rent_detail) {
 		$result = false;
 			try {
+
+				$this->db->trans_start();
 					$rent = $this->set_rent_data_model($rent_detail);
 					$condition = $this->set_condition_data_model($rent_detail['condition']);
 
-					$this->db->trans_start();
 							$this->db->insert('rent', $rent);
 							$rent_id = $this->db->insert_id();
 						$payment = array(
@@ -83,6 +84,46 @@ class Rent_model extends CI_Model {
 					return false;
 			}
 		
+	}
+
+	public  function extend_rent($extention_info) {
+		try {
+
+			$this->db->trans_start();
+				$this->db->select();
+				$this->db->limit(1);
+				$this->db->order_by('extended_on', 'DESC');
+		
+				$query = $this->db->get_where('extended_rent', array('RENT_ID' => $extention_info['RENT_ID']));
+				$previous = $query->row();
+		 
+					$rent_extention = array(
+						'RENT_ID' => $extention_info['RENT_ID'],
+						'extended_days' => $extention_info['extended_days'],
+						'owner_renting_price' => $extention_info['owner_renting_price'],
+						'rented_price' => $extention_info['rented_price'],
+					);
+
+					if($this->db->affected_rows() > 0 ) {
+						$rent_extention['REPEATED_EXTEND_ID'] =  $previous->EXTENDED_ID;
+					}
+
+					$rent_payment = array(
+						'RENT_ID' => $extention_info['RENT_ID'],
+						'payment_amount' => $extention_info['initial_payment'],
+					);				
+			
+				$result = $this->db->insert('rent_payment', $rent_payment);
+				$result = $this->db->insert('extended_rent', $rent_extention);
+					$extended_id = $this->db->insert_id();
+					
+				$this->db->trans_complete();
+
+			return ($this->db->trans_status() === FALSE ) ?  false: $extended_id ; 
+
+	   	}	catch(Exception $e) {
+			echo $e->getMessage();
+		}
 	}
 
 	public function delete_rent($deletedRents) {
@@ -140,33 +181,7 @@ class Rent_model extends CI_Model {
 		}
 	}
 
-public  function extend_rent($extention_info) {
-		try {
-				$this->db->select();
-				$this->db->limit(1);
-				$this->db->order_by('extended_on', 'DESC');
-		$query = $this->db->get_where('extended_rent', array('RENT_ID' => $extention_info['RENT_ID']));
-		$previous = $query->row();
-		 
-		$rent_extention = array(
-			'RENT_ID' => $extention_info['RENT_ID'],
-			'extended_days' => $extention_info['extended_days'],
-			'initial_payment' => $extention_info['initial_payment'],
-			'owner_renting_price' => $extention_info['owner_renting_price'],
-			'rented_price' => $extention_info['rented_price'],
-		);
-		if($this->db->affected_rows() > 0 ) {
-			$rent_extention['REPEATED_EXTEND_ID'] =  $previous->EXTENDED_ID;
-		}
 
-			$result = $this->db->insert('extended_rent', $rent_extention);
-		
-			return ($this->db->insert_id()) ? $this->db->insert_id() : false; 
-
-	   }catch(Exception $e) {
-		return false;
-		}
-	}
 
 	private function set_condition_data_model($vehicle_condition) {
 		$vehicle_condition_data_model;

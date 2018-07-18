@@ -52,7 +52,7 @@ class Rent extends API {
 			if ($result ) {
 				$this->response($result, API::HTTP_OK);
 			} else {
-				$this->response(["Something Wrong Happend When Trying to Extend rent, Try Again"], API::HTTP_BAD_REQUEST);
+				$this->response($result, API::HTTP_BAD_REQUEST);
 			}
 		}
 		
