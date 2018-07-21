@@ -26,12 +26,14 @@ class Vehicle extends API {
 		public function filter_get() {
 			$owner_id = $this->input->get('owner_id', TRUE);
 			$filter_string = $this->input->get('filter', TRUE);
+			
+			$catagory = $this->input->get('catagory', TRUE);
 			$sort = $this->input->get('sortOrder', TRUE);
 			$page_size = $this->input->get('pageSize', TRUE);
 			$page_number = $this->input->get('pageNumber', TRUE);
 			$sort_column = $this->input->get('sortColumn', TRUE);
 
-			$result = $this->vehicle_model->filter_vehicle($owner_id, $filter_string, $page_number, $page_size, $sort, $sort_column);
+			$result = $this->vehicle_model->filter_vehicle($owner_id, $catagory, $filter_string, $page_number, $page_size, $sort, $sort_column);
 			$this->response($result, API::HTTP_OK);
 		}
 

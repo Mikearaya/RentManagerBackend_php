@@ -9,26 +9,38 @@ class Rent_model extends CI_Model {
 		
 	}
 	
-	public function get_rent($id = NULL, $filter_string = '', $page_size = 100, $page_number = 0, $sort_order = 'ASC', $sort_column = '') {
+	public function get_rent($id = NULL,
+							$catagory = '',
+							 $filter_string = '', 
+							 $page_size = 100, $page_number = 0, $sort_order = 'ASC', $sort_column = '') {
 
 		$result = [];
 
 		$this->db->select("r.RENT_ID, CONCAT(c.first_name,'  ',c.last_name ) as rented_by, 
-						CONCAT(v.plate_code,'-',v.plate_number) as plate_number, r.start_date, r.return_date,
+						CONCAT(v.plate_code,'-',v.plate_number) as plate_number, r.start_date,
+						IFNULL(DATE_ADD(r.return_date , INTERVAL ex_r.extended_days DAY) , return_date) as return_date ,
 						v.make, v.model, v.type, v.color, v.fuiel_type,
 						v.cc, c.mobile_number, c.city, c.driving_licence_id,
-						DATEDIFF(return_date, start_date) as total_days, CONCAT(e.first_name,'  ',e.last_name ) as renting_staff, e.EMPLOYEE_ID,
+						IFNULL(DATEDIFF(return_date, start_date) + ex_r.extended_days,
+						DATEDIFF(return_date, start_date)) as total_days, 
+						CONCAT(e.first_name,'  ',e.last_name ) as renting_staff, e.EMPLOYEE_ID,
 						c.passport_number, c.nationality, r.owner_renting_price, p.payment_amount as 'initial_payment',
 						c.hotel_name, c.hotel_phone, r.added_on, r.updated_on, r.rented_price, r.colateral_deposit");
 		$this->db->from('rent r');
-		$today = date('Y-m-d hh:mm:ss');
-		$array = array('return_date >' => $today);	
-	
 		$this->db->join('vehicle v', 'r.VEHICLE_ID = v.VEHICLE_ID');
-		$this->db->join('employee e', 'r.RENTED_BY = e.EMPLOYEE_ID');
+		$this->db->join("(SELECT RENT_ID, SUM(extended_days) AS 'extended_days' 
+								FROM extended_rent
+								GROUP BY RENT_ID) AS ex_r" , 'r.RENT_ID = ex_r.RENT_ID', 'left');
+		$this->db->join('employee e', 'r.RENTED_BY = e.EMPLOYEE_ID'); 
 		$this->db->join('customer c' , 'c.CUSTOMER_ID = r.CUSTOMER_ID');
-		$this->db->join('rent_payment p' , 'r.RENT_ID = p.RENT_ID');
-		$this->db->where($array);
+		$this->db->join('rent_payment p' , 'r.RENT_ID = p.RENT_ID', 'left');
+		$this->db->group_by('r.RENT_ID');
+		
+		if (strtoupper(trim($catagory)) == 'PAST') {
+			$this->db->having("return_date < NOW()");
+		} else if (strtoupper(trim($catagory)) == 'ACTIVE') {
+			$this->db->having("return_date > NOW()");
+		}
 		$this->db->order_by($sort_column, $sort_order);
 		if(is_null($id)) {
 		$this->db->where("(CONCAT(c.first_name,' ',c.last_name) LIKE '%".$filter_string."%' OR v.plate_number

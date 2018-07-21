@@ -3,8 +3,8 @@
 
 class Vehicle_model extends CI_Model {
 
-	function __construct($config = 'rest') {
-		parent::__construct($config);
+	function __construct() {
+		parent::__construct();
 		$this->load->database();
 	}
 
@@ -20,33 +20,40 @@ class Vehicle_model extends CI_Model {
 		}
 	}
 
-	public function filter_vehicle($owner_id  = NULL, $filter_string = '', $page_number = 0, $page_size = NULL, $sort = 'ASC', $sort_column = 'VEHICLE_ID') {
+	public function filter_vehicle($owner_id  = NULL, $catagory = 'all', $filter_string, $page_number, $page_size, $sort = 'ASC', $sort_column = 'VEHICLE_ID') {
+		if($page_number == 0) {
+			$start = 0;
+			$end = $page_size;
+		} else {
+			$start = $page_number * $page_size;
+			$end = $start + $page_size;
+		}
+		$result_set = [];	
+		if($owner_id) {
+			$result_set = $this->db->get_where('vehicle', array('OWNER_ID' => $owner_id));
+		} else {
 			
-			$this->db->like('make', $filter_string);
-			$this->db->or_like('model', $filter_string, 'after');
-			$this->db->or_like('year_made', $filter_string);
-			$this->db->or_like('color', $filter_string, 'after');
-			$this->db->or_like('type', $filter_string);
-		
-			$this->db->order_by($sort_column, $sort);
-
-			if($page_number === 0) {
-				$start = 0;
-				$end = $page_size;
-			} else {
-				$start = $page_number * $page_size;
-				$end = $start + $page_size;
+			$like = "(make LIKE '%".$filter_string."%'  OR 
+					model LIKE '%".$filter_string."%' OR
+					year_made LIKE '%".$filter_string."%' OR
+					color LIKE '%".$filter_string."%' OR
+					type LIKE '%".$filter_string."%')";
+			$this->db->where($like);
+			if(strtoupper(trim($catagory)) == 'RENTED') {
+				$this->db->where("return_date > NOW()");	
+			} else if(strtoupper(trim($catagory)) == 'AVAILABLE') {
+				$this->db->where("return_date < NOW()");
 			}
-			$cloned = $this->db;
-			$result['total'] = $cloned->count_all_results('vehicle');
-			$this->db->limit($page_size , $start);
-			$result_set;	
-					if($owner_id) {
-				$result_set = $this->db->get_where('vehicle', array('OWNER_ID' => $owner_id));
+					
+			$this->db->join('rent', 'rent.VEHICLE_ID = vehicle.VEHICLE_ID');
+			$this->db->order_by($sort_column, $sort);
+			$cloned = clone $this->db;
 
-					} else {
-						$result_set = $this->db->get_where('vehicle');
-					}
+			$result['total'] = $cloned->count_all_results('vehicle');
+	
+			$result_set = $this->db->get('vehicle');
+		
+			}
 				$result['vehicles'] = $result_set->result_array();
 		
 			return $result;
