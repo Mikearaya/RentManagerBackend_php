@@ -37,7 +37,11 @@ class Dashboard_model extends CI_Model {
 							COUNT(CASE WHEN 
 							IFNULL(DATE_ADD(return_date, INTERVAL ex_r.extended_days DAY), return_date) > NOW() THEN 1 END) as 'rented', 
 							COUNT(CASE WHEN
-								 IFNULL(DATE_ADD(return_date, INTERVAL ex_r.extended_days DAY), return_date) <= NOW() THEN 1 END)  as 'available' ");
+								 IFNULL(DATE_ADD(return_date, INTERVAL ex_r.extended_days DAY), return_date) < NOW() THEN 1 END)  as 'available',
+								 COUNT(CASE WHEN
+								 IFNULL(DATE(DATE_ADD(return_date, INTERVAL ex_r.extended_days DAY)), DATE(return_date)) = DATE(NOW()) THEN 1 END)  as 'today_returns',
+								 COUNT(CASE WHEN
+								 IFNULL(WEEK(DATE_ADD(return_date, INTERVAL ex_r.extended_days DAY)), WEEK(return_date)) = WEEK(NOW()) THEN 1 END)  as 'this_week_return' ");
 		$this->db->from('vehicle');
 		$this->db->join('rent r', 'r.VEHICLE_ID = vehicle.VEHICLE_ID');
 		$this->db->join("(SELECT RENT_ID, SUM(extended_days) AS 'extended_days' 
@@ -56,7 +60,7 @@ class Dashboard_model extends CI_Model {
 	}
 
 	function rent_payment_summary() {
-		$this->db->select("COUNT(*), IFNULL(sum(DATEDIFF(return_date, start_date) * rent.rented_price) + SUM(extended_days * extended_rent.rented_price), 
+		$this->db->select("IFNULL(sum(DATEDIFF(return_date, start_date) * rent.rented_price) + SUM(extended_days * extended_rent.rented_price), 
 							SUM(DATEDIFF(return_date, start_date) * rent.rented_price) ) as 'total_amount', 
 										SUM(rent_payment.payment_amount) AS 'paid_amount', 
 							IFNULL( (SUM(DATEDIFF(return_date, start_date) * rent.rented_price) + 
