@@ -17,15 +17,29 @@ class Rent_model extends CI_Model {
 		$result = [];
 
 		$this->db->select("r.RENT_ID, CONCAT(c.first_name,'  ',c.last_name ) as rented_by, 
-						CONCAT(v.plate_code,'-',v.plate_number) as plate_number, r.start_date,
-						IFNULL(DATE_ADD(r.return_date , INTERVAL ex_r.extended_days DAY) , return_date) as return_date ,
-						v.make, v.model, v.type, v.color, v.fuiel_type,
-						v.cc, c.mobile_number, c.city, c.driving_licence_id,
-						IFNULL(DATEDIFF(return_date, start_date) + ex_r.extended_days,
-						DATEDIFF(return_date, start_date)) as total_days, 
-						CONCAT(e.first_name,'  ',e.last_name ) as renting_staff, e.EMPLOYEE_ID,
-						c.passport_number, c.nationality, r.owner_renting_price, p.payment_amount as 'initial_payment',
-						c.hotel_name, c.hotel_phone, r.added_on, r.updated_on, r.rented_price, r.colateral_deposit");
+						CONCAT(v.plate_code,'-',v.plate_number) as plate_number, 
+						DATE(r.start_date) AS 'start_date',
+						DATE((IFNULL(DATE_ADD(r.return_date , INTERVAL ex_r.extended_days DAY) , return_date))) as return_date ,
+						GREATEST(DATEDIFF((IFNULL(DATE_ADD(r.return_date , INTERVAL ex_r.extended_days DAY) , return_date)), NOW()), 0)  as remaining_days ,
+						v.make, 
+					
+						v.model, 
+						v.type, 
+						v.color, 
+						v.fuiel_type,
+						v.cc,
+						 c.mobile_number, 
+						 c.city, 
+						 c.driving_licence_id,
+						IFNULL(DATEDIFF(return_date, start_date) + ex_r.extended_days,	DATEDIFF(return_date, start_date)) as total_days, 
+						CONCAT(e.first_name,'  ',e.last_name ) as renting_staff,
+						e.EMPLOYEE_ID,
+						c.passport_number, 
+						c.nationality, 
+						r.owner_renting_price, 
+						p.payment_amount as 'initial_payment',
+						r.status,
+						IFNULL(c.hotel_name, ''), IFNULL(c.hotel_phone, '' ), r.added_on, r.updated_on, r.rented_price, r.colateral_deposit");
 		$this->db->from('rent r');
 		$this->db->join('vehicle v', 'r.VEHICLE_ID = v.VEHICLE_ID');
 		$this->db->join("(SELECT RENT_ID, SUM(extended_days) AS 'extended_days' 

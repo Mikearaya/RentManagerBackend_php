@@ -34,6 +34,8 @@ class Dashboard_model extends CI_Model {
 
 	function number_of_vehicles() {
 		$this->db->select("COUNT(*) as 'total',  
+		COUNT(CASE WHEN 
+							IFNULL(DATE_ADD(return_date, INTERVAL ex_r.extended_days DAY), return_date) < NOW() AND UPPER(r.status) = 'RENTED' THEN 1 END) as 'overdo_rents', 
 							COUNT(CASE WHEN 
 							IFNULL(DATE_ADD(return_date, INTERVAL ex_r.extended_days DAY), return_date) > NOW() THEN 1 END) as 'rented', 
 							COUNT(CASE WHEN
@@ -60,19 +62,39 @@ class Dashboard_model extends CI_Model {
 	}
 
 	function rent_payment_summary() {
-		$this->db->select("IFNULL(sum(DATEDIFF(return_date, start_date) * rent.rented_price) + SUM(extended_days * extended_rent.rented_price), 
+		$this->db->select("IFNULL(sum(DATEDIFF(return_date, start_date) * rent.rented_price) + SUM(extended_days * ex_r.rented_price), 
 							SUM(DATEDIFF(return_date, start_date) * rent.rented_price) ) as 'total_amount', 
 										SUM(rent_payment.payment_amount) AS 'paid_amount', 
-							IFNULL( (SUM(DATEDIFF(return_date, start_date) * rent.rented_price) + 
-									(SUM(extended_days * extended_rent.rented_price) - SUM(rent_payment.payment_amount))),
-									(SUM(DATEDIFF(return_date, start_date) * rent.rented_price) -  SUM(rent_payment.payment_amount  )))  AS 'remaining_amount'");	
+										IFNULL( ((DATEDIFF(return_date, start_date) * rent.rented_price) + (SUM(extended_days * ex_r.rented_price) - rent_payment.payment_amount)),
+													((DATEDIFF(return_date, start_date) * rent.rented_price) -  SUM(rent_payment.payment_amount  )))  AS 'remaining_amount'");	
 		$this->db->from('rent');
-		$this->db->join('rent_payment', 'rent_payment.RENT_ID = rent.RENT_ID');
-		$this->db->join( '(SELECT RENT_ID, extended_days, rented_price FROM extended_rent GROUP BY RENT_ID ) AS extended_rent', 
-													'rent.RENT_ID =  extended_rent.RENT_ID', "left");
+		$this->db->join("(SELECT RENT_ID,  payment_amount from rent_payment group by RENT_ID) AS rent_payment", "rent.RENT_ID =  rent_payment.RENT_ID" );
+		$this->db->join( '(SELECT RENT_ID, SUM(extended_days) as extended_days, rented_price FROM extended_rent GROUP BY RENT_ID ) AS ex_r', 
+													'rent.RENT_ID =  ex_r.RENT_ID', "left");
 													
 		$result = $this->db->get();
 		return $result->row_array();
+	}
+
+	function rent_summary() {
+		$this->db->select("COUNT(*) as 'total',  
+							COUNT(CASE WHEN 
+							IFNULL(DATE_ADD(return_date, INTERVAL ex_r.extended_days DAY), return_date) > NOW() AND UPPER(r.status) = 'RENTED' THEN 1 END) as 'overdo_rents', 
+							COUNT(CASE WHEN 
+							IFNULL(DATE_ADD(return_date, INTERVAL ex_r.extended_days DAY), return_date) > NOW() THEN 1 END) as 'rented', 
+							COUNT(CASE WHEN
+								 IFNULL(DATE_ADD(return_date, INTERVAL ex_r.extended_days DAY), return_date) < NOW() THEN 1 END)  as 'available',
+								 COUNT(CASE WHEN
+								 IFNULL(DATE(DATE_ADD(return_date, INTERVAL ex_r.extended_days DAY)), DATE(return_date)) = DATE(NOW()) THEN 1 END)  as 'today_returns',
+								 COUNT(CASE WHEN
+								 IFNULL(WEEK(DATE_ADD(return_date, INTERVAL ex_r.extended_days DAY)), WEEK(return_date)) = WEEK(NOW()) THEN 1 END)  as 'this_week_return' ");
+		$this->db->from('vehicle');
+		$this->db->join('rent r', 'r.VEHICLE_ID = vehicle.VEHICLE_ID');
+		$this->db->join("(SELECT RENT_ID, SUM(extended_days) AS 'extended_days' 
+								FROM extended_rent
+								GROUP BY RENT_ID) AS ex_r" , 'r.RENT_ID = ex_r.RENT_ID', 'left');
+		$result = $this->db->get();
+		return $result->row();
 	}
 }
 
