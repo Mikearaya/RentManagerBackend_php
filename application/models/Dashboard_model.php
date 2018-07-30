@@ -39,16 +39,17 @@ class Dashboard_model extends CI_Model {
 							COUNT(CASE WHEN 
 							IFNULL(DATE_ADD(return_date, INTERVAL ex_r.extended_days DAY), return_date) > NOW() THEN 1 END) as 'rented', 
 							COUNT(CASE WHEN
-								 IFNULL(DATE_ADD(return_date, INTERVAL ex_r.extended_days DAY), return_date) < NOW() THEN 1 END)  as 'available',
+								 (	status = 'RETURNED'  OR ISNULL(status) ) THEN 1 END)  as 'available',
 								 COUNT(CASE WHEN
 								 IFNULL(DATE(DATE_ADD(return_date, INTERVAL ex_r.extended_days DAY)), DATE(return_date)) = DATE(NOW()) THEN 1 END)  as 'today_returns',
 								 COUNT(CASE WHEN
 								 IFNULL(WEEK(DATE_ADD(return_date, INTERVAL ex_r.extended_days DAY)), WEEK(return_date)) = WEEK(NOW()) THEN 1 END)  as 'this_week_return' ");
 		$this->db->from('vehicle');
-		$this->db->join('rent r', 'r.VEHICLE_ID = vehicle.VEHICLE_ID');
+		$this->db->join("(SELECT * FROM rent GROUP BY VEHICLE_ID) as  r", 'r.VEHICLE_ID = vehicle.VEHICLE_ID', 'left');
 		$this->db->join("(SELECT RENT_ID, SUM(extended_days) AS 'extended_days' 
 								FROM extended_rent
 								GROUP BY RENT_ID) AS ex_r" , 'r.RENT_ID = ex_r.RENT_ID', 'left');
+	
 		$result = $this->db->get();
 		return $result->row();
 	}

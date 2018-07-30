@@ -21,17 +21,19 @@ class Vehicle_model extends CI_Model {
 	}
 
 	public function filter_vehicle($owner_id  = NULL, $catagory = 'all', $filter_string, $page_number, $page_size, $sort = 'ASC', $sort_column = 'VEHICLE_ID') {
-		if($page_number == 0) {
-			$start = 0;
-			$end = $page_size;
-		} else {
-			$start = $page_number * $page_size;
-			$end = $start + $page_size;
-		}
+		
 		$result_set = [];	
 		if($owner_id) {
 			$result_set = $this->db->get_where('vehicle', array('OWNER_ID' => $owner_id));
 		} else {
+
+			if($page_number == 0) {
+				$start = 0;
+				$end = $page_size;
+			} else {
+				$start = $page_number * $page_size;
+				$end = $start + $page_size;
+			}
 			
 			$like = "(make LIKE '%".$filter_string."%'  OR 
 					model LIKE '%".$filter_string."%' OR
@@ -51,7 +53,7 @@ class Vehicle_model extends CI_Model {
 		
 
 			$cloned = clone $this->db;
-	
+			$this->db->limit($page_size, $start);
 			
 			$result['total'] = $cloned->count_all_results('vehicle');
 	
