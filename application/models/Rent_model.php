@@ -51,9 +51,9 @@ class Rent_model extends CI_Model {
 		$this->db->group_by('r.RENT_ID');
 		
 		if (strtoupper(trim($catagory)) == 'PAST') {
-			$this->db->having("return_date < NOW()");
+			$this->db->having("return_date < NOW() OR status = 'RETURNED'");
 		} else if (strtoupper(trim($catagory)) == 'ACTIVE') {
-			$this->db->having("return_date > NOW()");
+			$this->db->having("(return_date > NOW() AND status <> 'RETURNED')");
 		}
 		$this->db->order_by($sort_column, $sort_order);
 		if(is_null($id)) {
@@ -76,7 +76,7 @@ class Rent_model extends CI_Model {
 			$result['rents'] = $result_set->result_array();
 			return $result;
 		} else {
-				$this->db->where('RENT_ID',$id );
+				$this->db->where('r.RENT_ID',$id );
 				$result = $this->db->get();
 			return $result->row_array();
 		} 
@@ -150,6 +150,17 @@ class Rent_model extends CI_Model {
 	   	}	catch(Exception $e) {
 			echo $e->getMessage();
 		}
+	}
+
+	public function close_rent($rent_id) {
+		try {
+				$this->db->where('RENT_ID', $rent_id);
+				$status = array('status' => 'RETURNED');
+				return $this->db->update('rent', $status);
+				
+			} catch(Exception $e) {
+				return false;
+			}
 	}
 
 	public function delete_rent($deletedRents) {

@@ -75,6 +75,17 @@ class Rent extends API {
 
 	}
 
+	public function close_GET($rent_id ) {
+		$result = $this->rent_model->close_rent($rent_id);
+
+		if($result) {
+			$this->response("Rent Closed Successfuly", API::HTTP_CREATED);
+		} else {
+			$this->response("Unknown Error While closing rent, Try Again", API::HTTP_BAD_REQUEST);
+		}
+
+	}
+
 	
 
 	public function delete_POST($deletedRents) {

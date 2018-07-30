@@ -40,15 +40,19 @@ class Vehicle_model extends CI_Model {
 					type LIKE '%".$filter_string."%')";
 			$this->db->where($like);
 			if(strtoupper(trim($catagory)) == 'RENTED') {
-				$this->db->where("return_date > NOW()");	
+				$this->db->where("status = 'RENTED'");	
 			} else if(strtoupper(trim($catagory)) == 'AVAILABLE') {
-				$this->db->where("return_date < NOW()");
+				$this->db->where("status = 'RETURNED' OR ISNULL(status) ");
 			}
 					
-			$this->db->join('rent', 'rent.VEHICLE_ID = vehicle.VEHICLE_ID');
+			$this->db->join('(SELECT VEHICLE_ID as R_VEHICLE_ID, status FROM rent ) as rent', 'rent.R_VEHICLE_ID = vehicle.VEHICLE_ID', 'left');
+			$this->db->group_by('vehicle.VEHICLE_ID');
 			$this->db->order_by($sort_column, $sort);
-			$cloned = clone $this->db;
+		
 
+			$cloned = clone $this->db;
+	
+			
 			$result['total'] = $cloned->count_all_results('vehicle');
 	
 			$result_set = $this->db->get('vehicle');
