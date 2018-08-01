@@ -74,10 +74,11 @@ class Vehicle_model extends CI_Model {
 		$this->db->join('rent', 'rent.VEHICLE_ID = vehicle.VEHICLE_ID', "left");
 
 		$today = date('Y-m-d hh:mm:ss');
-		$where = array('return_date <' => $today);	
-		$or_where = array('return_date = ' => NULL);
+		$where = array('UPPER(status) =' => 'RETURNED');	
+		$or_where = array('UPPER(status) = ' => NULL);
 		$this->db->where($where);
 		$this->db->or_where($or_where);
+		$this->db->group_by('VEHICLE_ID');
 		$query = $this->db->get();
 		return $query->result_array();
 	}
