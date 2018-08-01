@@ -77,6 +77,7 @@ class Vehicle extends API {
 
 				$this->form_validation->set_rules('fuiel_type', 'Fuiel Type', 'trim|required');
 				$this->form_validation->set_rules('cc', 'Car CC', 'trim|required|numeric');
+				$this->form_validation->set_rules('transmission', 'Transmission', 'trim|strtoupper|required|in_list[MANUAL,AUTOMATIC]');
 				$this->form_validation->set_rules('total_passanger', 'Total Passanger', 'trim|required|numeric');
 				$this->form_validation->set_rules('cylinder_count', 'Number of Cylinders', 'trim|required|numeric');
 				$this->form_validation->set_rules('plate_code', 'Plate Code', 'trim|required|numeric');

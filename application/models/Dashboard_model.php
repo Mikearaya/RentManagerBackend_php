@@ -63,14 +63,14 @@ class Dashboard_model extends CI_Model {
 	}
 
 	function rent_payment_summary() {
-		$this->db->select("IFNULL(sum(DATEDIFF(return_date, start_date) * rent.rented_price) + SUM(extended_days * ex_r.rented_price), 
-							SUM(DATEDIFF(return_date, start_date) * rent.rented_price) ) as 'total_amount', 
-										SUM(rent_payment.payment_amount) AS 'paid_amount', 
-										IFNULL( ((DATEDIFF(return_date, start_date) * rent.rented_price) + (SUM(extended_days * ex_r.rented_price) - rent_payment.payment_amount)),
-													((DATEDIFF(return_date, start_date) * rent.rented_price) -  SUM(rent_payment.payment_amount  )))  AS 'remaining_amount'");	
+		$this->db->select(" SUM(IFNULL(DATEDIFF(return_date, start_date) * rent.rented_price + extended_payment, 
+		DATEDIFF(return_date, start_date) * rent.rented_price)) as 'total_amount', 
+					SUM(rent_payment.payment_amount) AS 'paid_amount', 
+					SUM(IFNULL( ((DATEDIFF(return_date, start_date) * rent.rented_price) + (extended_payment - rent_payment.payment_amount)),
+								(DATEDIFF(return_date, start_date) * rent.rented_price) - rent_payment.payment_amount ))  AS 'remaining_amount' ");	
 		$this->db->from('rent');
-		$this->db->join("(SELECT RENT_ID,  payment_amount from rent_payment group by RENT_ID) AS rent_payment", "rent.RENT_ID =  rent_payment.RENT_ID" );
-		$this->db->join( '(SELECT RENT_ID, SUM(extended_days) as extended_days, rented_price FROM extended_rent GROUP BY RENT_ID ) AS ex_r', 
+		$this->db->join("(SELECT RENT_ID,  SUM(payment_amount) as 'payment_amount' from rent_payment GROUP BY RENT_ID)  AS rent_payment", "rent.RENT_ID =  rent_payment.RENT_ID", "left" );
+		$this->db->join( '(SELECT RENT_ID, SUM(extended_days) as extended_days, SUM(rented_price * extended_days) as extended_payment,  rented_price FROM extended_rent) AS ex_r', 
 													'rent.RENT_ID =  ex_r.RENT_ID', "left");
 													
 		$result = $this->db->get();

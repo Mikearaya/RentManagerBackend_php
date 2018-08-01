@@ -17,7 +17,7 @@ class Payment_model extends CI_Model {
 										IFNULL((DATEDIFF(return_date, start_date) * (rent.rented_price - rent.owner_renting_price )) + comission_from_extended, 
 										(DATEDIFF(return_date, start_date) * (rent.rented_price - rent.owner_renting_price)))  as 'total_comission', 
 							SUM(rent_payment.payment_amount) AS 'paid_amount', 
-							IFNULL( ((DATEDIFF(return_date, start_date) * rent.rented_price) + (SUM(extended_days * ex_r.rented_price) - rent_payment.payment_amount)),
+							IFNULL( ((DATEDIFF(return_date, start_date) * rent.rented_price) + (ex_r.extended_rent_payment - SUM(rent_payment.payment_amount))),
 													((DATEDIFF(return_date, start_date) * rent.rented_price) -  SUM(rent_payment.payment_amount  )))  AS 'remaining_amount',
 							IFNULL((DATEDIFF(return_date, start_date) + extended_days),
 													  DATEDIFF(return_date, start_date)) as total_days, rent_payment.payment_amount,

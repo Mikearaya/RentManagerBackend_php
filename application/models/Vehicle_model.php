@@ -39,6 +39,7 @@ class Vehicle_model extends CI_Model {
 					model LIKE '%".$filter_string."%' OR
 					year_made LIKE '%".$filter_string."%' OR
 					color LIKE '%".$filter_string."%' OR
+					transmission LIKE '%".$filter_string."%' OR
 					type LIKE '%".$filter_string."%')";
 			$this->db->where($like);
 			if(strtoupper(trim($catagory)) == 'RENTED') {
@@ -139,8 +140,9 @@ class Vehicle_model extends CI_Model {
 			'chassis_number' => $vehicle['chassis_number'],
 			'motor_number' => $vehicle['motor_number'],
 			'fuiel_type' => $vehicle['fuiel_type'],
+			'transmission' => $vehicle['transmission'],
 			'cc' => $vehicle['cc'],
-			'total_passanger' => $vehicle['total_passanger'],
+			'total_passanger' => strtoupper($vehicle['total_passanger']),
 			'cylinder_count' => $vehicle['cylinder_count'],
 			'plate_code' => $vehicle['plate_code'],
 			'plate_number' => $vehicle['plate_number'],
